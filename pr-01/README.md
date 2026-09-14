@@ -455,9 +455,107 @@ nmap.org                                       A      2866  Answer     50.11
 | IP-адреса | IPv4 50.116.1.184 , IPv6 2600:3c01:e000:3e6::6d4e:7061 | IPv4 50.116.1.184 , IPv6 2600:3c01:e000:3e6::6d4e:7061 |
 | Значення TTL | У IPv4 3132 , У IPv6 1516 | У IPv4 2866 , У IPv6 1249 |
 ## A.4. Контрольний ресурс
-
+**Команда:**
+```
+curl -v https://google.com
+```
+**Вивід:**
+```
+* Host google.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 142.250.109.138, 142.250.109.100, 142.250.109.113, 142.250.109.102, 142.250.109.139, 142.250.109.101
+*   Trying 142.250.109.138:443...
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* ALPN: server accepted http/1.1
+* Established connection to google.com (142.250.109.138 port 443) from 192.168.31.177 port 64181
+* using HTTP/1.x
+> GET / HTTP/1.1
+> Host: google.com
+> User-Agent: curl/8.21.0
+> Accept: */*
+>
+* Request completely sent off
+* schannel: remote party requests renegotiation
+* schannel: renegotiating SSL/TLS connection
+* schannel: SSL/TLS connection renegotiated
+< HTTP/1.1 301 Moved Permanently
+< Location: https://www.google.com/
+< Content-Type: text/html; charset=UTF-8
+< Content-Security-Policy-Report-Only: object-src 'none';base-uri 'self';script-src 'nonce-Ephau4V_plqXlsrVevZdPA' 'strict-dynamic' 'report-sample' 'unsafe-eval' 'unsafe-inline' https: http:;report-uri https://csp.withgoogle.com/csp/gws/other-hp
+< Date: Mon, 14 Sep 2026 18:48:29 GMT
+< Expires: Wed, 14 Oct 2026 18:48:29 GMT
+< Cache-Control: public, max-age=2592000
+< Server: gws
+< Content-Length: 220
+< X-XSS-Protection: 0
+< X-Frame-Options: SAMEORIGIN
+< Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+<
+<HTML><HEAD><meta http-equiv="content-type" content="text/html;charset=utf-8">
+<TITLE>301 Moved</TITLE></HEAD><BODY>
+<H1>301 Moved</H1>
+The document has moved
+<A HREF="https://www.google.com/">here</A>.
+</BODY></HTML>
+* Connection #0 to host google.com:443 left intact
+```
 ## A.5. Ресурси з некоректною конфігурацією сертифіката
+**Випадок 1**
+```
+curl -v https://expired.badssl.com
+```
+```
+* Host expired.badssl.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 104.154.89.105
+*   Trying 104.154.89.105:443...
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* schannel: next InitializeSecurityContext failed: SEC_E_CERT_EXPIRED (0x80090328) - The received certificate has expired.
+* closing connection #0
+curl: (35) schannel: next InitializeSecurityContext failed: SEC_E_CERT_EXPIRED (0x80090328) - The received certificate has expired.
+```
+**Випадок 2**
+```
+curl -v https://wrong.host.badssl.com
+```
+```
+* Host wrong.host.badssl.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 104.154.89.105
+*   Trying 104.154.89.105:443...
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* schannel: SNI or certificate check failed: SEC_E_WRONG_PRINCIPAL (0x80090322) - The target principal name is incorrect.
+* closing connection #0
+curl: (60) schannel: SNI or certificate check failed: SEC_E_WRONG_PRINCIPAL (0x80090322) - The target principal name is incorrect.
+More details here: https://curl.se/docs/sslcerts.html
 
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the webpage mentioned above.
+```
+**Випадок 3**
+```
+curl -v https://self-signed.badssl.com
+```
+```
+* Host self-signed.badssl.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 104.154.89.105
+*   Trying 104.154.89.105:443...
+* schannel: disabled automatic use of client certificate
+* ALPN: curl offers http/1.1
+* schannel: SEC_E_UNTRUSTED_ROOT (0x80090325) - The certificate chain was issued by an authority that is not trusted.
+* closing connection #0
+curl: (60) schannel: SEC_E_UNTRUSTED_ROOT (0x80090325) - The certificate chain was issued by an authority that is not trusted.
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the webpage mentioned above.
+```
 # Частина B. Власна модель рівнів
 # Контрольні питання
 # Висновки
